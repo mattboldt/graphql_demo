@@ -54,8 +54,14 @@ module Types
     field :name, String, null: true
     field :email, String, null: true
     field :books, [Types::BookType], null: true
+    field :books_count, Integer, null: true
+
+    def books_count
+      books.size
+    end
   end
 end
+
 
 # app/graphql/types/book_type.rb
 module Types
@@ -85,6 +91,22 @@ module Types
 end
 
 ```
+
+
+### graphiql
+
+```ruby
+gem "graphiql-rails"
+
+# routes.rb
+if Rails.env.development?
+  mount GraphiQL::Rails::Engine, at: "/graphiql", graphql_path: "graphql#execute"
+end
+
+# application.rb
+require "sprockets/railtie"
+```
+
 
 # Frontend
 
