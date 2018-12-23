@@ -13,18 +13,23 @@ const GET_USER = gql`
 `;
 
 const User = ({ user }) => (
-  <Query query={GET_USER} variables={{ id: user.id }}>
-    {({ loading, error, data }) => {
-      if (loading) return <p>Loading...</p>;
-      if (error) return <p>Error :(</p>;
+  <React.Fragment>
+    <button onClick={() => this.loadUser(user)}>
+      {user.booksCount} books
+    </button>
+    <Query query={GET_USER} variables={{ id: user.id }}>
+      {({ loading, error, data }) => {
+        if (loading) return <p>Loading...</p>;
+        if (error) return <p>Error :(</p>;
 
-      return <ul>
-        {data.user.books.map((b, i) => {
-          return <li key={`book-${i}`}>{b.title}</li>
-        })}
-      </ul>
-    }}
-  </Query>
+        return <ul>
+          {data.user.books.map((b, i) => {
+            return <li key={`book-${i}`}>{b.title}</li>
+          })}
+        </ul>
+      }}
+    </Query>
+  </React.Fragment>
 );
 
 export default User;

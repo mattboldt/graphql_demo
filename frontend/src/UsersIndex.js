@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { Query } from "react-apollo";
+import { Query, Mutation } from "react-apollo";
 import gql from "graphql-tag";
 import User from "./User";
 
-const USERS = gql`
+const GET_USERS = gql`
   {
     users {
       id
@@ -14,35 +14,75 @@ const USERS = gql`
   }
 `
 
+const ADD_USER = gql`
+  mutation CreateUser($name: String!, $email: String!) {
+    createUser(input: { name: $name, email: $email }) {
+       user {
+        id
+        name
+        email
+        booksCount
+      }
+      errors
+    }
+  }
+`;
+
+
 class UsersIndex extends Component {
   state = { users: {} }
 
-  loadUser(user) {
-    let users = this.state.users;
-    users[user.id] = user;
-    this.setState({ users });
-  }
-
   render() {
-    return (
-      <Query query={USERS}>
-        {({ loading, error, data }) => {
-          if (loading) return <p>Loading...</p>;
-          if (error) return <p>Error :(</p>;
+    let nameInput;
+    let emailInput;
 
-          return <ul>
-            {data.users.map((user) => {
-              return <li key={user.id}>
-                {user.name} -
-                <button onClick={() => this.loadUser(user)}>
-                  {user.booksCount} books
-                </button>
-                {this.state.users[user.id] && <User user={this.state.users[user.id]} />}
-              </li>
-            })}
-          </ul>
-        }}
-      </Query>
+    return (
+      <React.Fragment>
+        <Query query={GET_USERS}>
+          {({ loading, error, data }) => {
+            if (loading) return <p>Loading...</p>;
+            if (error) return <p>Error :(</p>;
+
+            return <ul>
+              {data.users.map((user) => {
+                return <li key={user.id}>
+                  {user.name} -
+
+                  <User user={user} />
+                </li>
+              })}
+            </ul>
+          }}
+        </Query>
+
+        <Mutation
+          mutation={ADD_USER}
+          update={(cache, { data: { addUser } }) => {
+            const { users } = cache.readQuery({ query: GET_USERS });
+            cache.writeQuery({
+              query: GET_USERS,
+              data: { users: users.concat([addUser]) }
+            });
+          }}>
+          {addUser => (
+            <div>
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                addUser({
+                  variables: {
+                    name: nameInput.value,
+                    email: emailInput.value
+                  }
+                });
+              }}>
+                <input ref={(node) => { nameInput = node; }} />
+                <input ref={(node) => { emailInput = node; }} />
+                <button type="submit">Add User</button>
+              </form>
+            </div>
+          )}
+        </Mutation>
+      </React.Fragment>
     )
   }
 }
