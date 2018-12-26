@@ -4,7 +4,7 @@ import gql from "graphql-tag";
 import User from "./User";
 
 const GET_USERS = gql`
-  {
+  query myQuery {
     users {
       id
       name
@@ -32,6 +32,18 @@ const ADD_USER = gql`
 class UsersIndex extends Component {
   state = { users: {} }
 
+  addUser = (e, addUser, nameInput, emailInput) => {
+    e.preventDefault();
+    addUser({
+      variables: {
+        name: nameInput.value,
+        email: emailInput.value
+      }
+    });
+    nameInput.value = '';
+    emailInput.value = '';
+  }
+
   render() {
     let nameInput;
     let emailInput;
@@ -49,15 +61,7 @@ class UsersIndex extends Component {
           }}>
           {addUser => (
             <div className="mt-2 mb-4">
-              <form className="form-inline" onSubmit={(e) => {
-                e.preventDefault();
-                addUser({
-                  variables: {
-                    name: nameInput.value,
-                    email: emailInput.value
-                  }
-                });
-              }}>
+              <form className="form-inline" onSubmit={(e) => this.addUser(e, addUser, nameInput, emailInput)}>
                 <input placeholder="Name" className="form-control" ref={(node) => { nameInput = node; }} />
                 <input placeholder="Email" className="form-control" ref={(node) => { emailInput = node; }} />
                 <button type="submit" className="btn btn-primary">Add User</button>
