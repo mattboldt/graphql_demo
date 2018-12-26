@@ -38,23 +38,6 @@ class UsersIndex extends Component {
 
     return (
       <React.Fragment>
-        <Query query={GET_USERS}>
-          {({ loading, error, data }) => {
-            if (loading) return <p>Loading...</p>;
-            if (error) return <p>Error :(</p>;
-
-            return <ul>
-              {data.users.map((user) => {
-                return <li key={user.id}>
-                  {user.name} -
-
-                  <User user={user} />
-                </li>
-              })}
-            </ul>
-          }}
-        </Query>
-
         <Mutation
           mutation={ADD_USER}
           update={(cache, { data: { addUser } }) => {
@@ -65,8 +48,8 @@ class UsersIndex extends Component {
             });
           }}>
           {addUser => (
-            <div>
-              <form onSubmit={(e) => {
+            <div className="mt-2 mb-4">
+              <form className="form-inline" onSubmit={(e) => {
                 e.preventDefault();
                 addUser({
                   variables: {
@@ -75,13 +58,28 @@ class UsersIndex extends Component {
                   }
                 });
               }}>
-                <input ref={(node) => { nameInput = node; }} />
-                <input ref={(node) => { emailInput = node; }} />
-                <button type="submit">Add User</button>
+                <input placeholder="Name" className="form-control" ref={(node) => { nameInput = node; }} />
+                <input placeholder="Email" className="form-control" ref={(node) => { emailInput = node; }} />
+                <button type="submit" className="btn btn-primary">Add User</button>
               </form>
             </div>
           )}
         </Mutation>
+
+        <Query query={GET_USERS}>
+          {({ loading, error, data }) => {
+            if (loading) return <p>Loading...</p>;
+            if (error) return <p>Error :(</p>;
+
+            return <ul className="list-group">
+              {data.users.map((user) => {
+                return <li key={user.id} className="list-group-item">
+                  {user.name} <User user={user} />
+                </li>
+              })}
+            </ul>
+          }}
+        </Query>
       </React.Fragment>
     )
   }

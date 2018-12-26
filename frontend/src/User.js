@@ -33,12 +33,12 @@ class User extends Component {
       <ApolloConsumer>
         {client => (
           <React.Fragment>
-            <button onClick={() => this.toggleShow(client)}>
+            <button className="btn btn-light float-right" onClick={() => this.toggleShow(client)}>
               {this.state.show ? 'Hide' : 'Show'} {this.props.user.booksCount} books
             </button>
-            {this.state.user && this.state.show && <ul>
+            {this.state.user && this.state.show && <ul className="list-group mt-4">
               {this.state.user.books.map((b, i) =>
-                <li key={`book-${i}`}>{b.title}</li>
+                <li className="list-group-item" key={`book-${i}`}>{b.title}</li>
               )}
             </ul>}
           </React.Fragment>
