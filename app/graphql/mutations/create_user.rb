@@ -9,6 +9,7 @@ class Mutations::CreateUser < Mutations::BaseMutation
   field :errors, [String], null: false
 
   def resolve(name:, email:)
+    binding.pry
     user = User.new(name: name, email: email)
     if user.save
       # Successful creation, return the created object with no errors
