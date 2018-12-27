@@ -3,7 +3,6 @@ class Mutations::CreateUser < Mutations::BaseMutation
 
   argument :name, String, required: true
   argument :email, String, required: true
-  # field :books, [Types::BookType], null: true
 
   field :user, Types::UserType, null: false
   field :errors, [String], null: false
