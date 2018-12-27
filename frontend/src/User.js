@@ -21,7 +21,7 @@ class User extends Component {
   render() {
     return (
       <React.Fragment>
-        <button className="btn btn-light float-right" onClick={() => this.toggleShow}>
+        <button className="btn btn-light float-right" onClick={() => this.toggleShow()}>
           {this.state.show ? 'Hide' : 'Show'} {this.props.user.booksCount} books
         </button>
         {this.state.user && this.state.show && <ul className="list-group mt-4">
