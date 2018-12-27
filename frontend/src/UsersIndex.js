@@ -1,89 +1,60 @@
 import React, { Component } from 'react';
-import { Query, Mutation } from "react-apollo";
-import gql from "graphql-tag";
+import client from './ApolloClient';
+import { GET_USERS, ADD_USER } from './Queries';
 import User from "./User";
-
-const GET_USERS = gql`
-  query myQuery {
-    users {
-      id
-      name
-      email
-      booksCount
-    }
-  }
-`
-
-const ADD_USER = gql`
-  mutation CreateUser($name: String!, $email: String!) {
-    createUser(input: { name: $name, email: $email }) {
-       user {
-        id
-        name
-        email
-        booksCount
-      }
-      errors
-    }
-  }
-`;
 
 
 class UsersIndex extends Component {
-  state = { users: {} }
+  state = { users: [], name: '', email: '' }
 
-  addUser = (e, addUser, nameInput, emailInput) => {
-    e.preventDefault();
-    addUser({
-      variables: {
-        name: nameInput.value,
-        email: emailInput.value
-      }
+  async componentDidMount() {
+    const { data } = await client.query({
+      query: GET_USERS
     });
-    nameInput.value = '';
-    emailInput.value = '';
+
+    this.setState({ users: data.users });
+  }
+
+  async addUser(e) {
+    e.preventDefault();
+
+    const { data } = await client.mutate({
+      mutation: ADD_USER,
+      variables: { name: this.state.name, email: this.state.email }
+    });
+
+    const newUsers = [data.createUser.user, ...this.state.users];
+    this.setState({ users: newUsers, name: '', email: '' });
+  }
+
+  handleInputChange = (event) => {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
   }
 
   render() {
-    let nameInput;
-    let emailInput;
-
     return (
       <React.Fragment>
-        <Mutation
-          mutation={ADD_USER}
-          update={(cache, { data: { addUser } }) => {
-            const { users } = cache.readQuery({ query: GET_USERS });
-            cache.writeQuery({
-              query: GET_USERS,
-              data: { users: users.concat([addUser]) }
-            });
-          }}>
-          {addUser => (
-            <div className="mt-2 mb-4">
-              <form className="form-inline" onSubmit={(e) => this.addUser(e, addUser, nameInput, emailInput)}>
-                <input placeholder="Name" className="form-control" ref={(node) => { nameInput = node; }} />
-                <input placeholder="Email" className="form-control" ref={(node) => { emailInput = node; }} />
-                <button type="submit" className="btn btn-primary">Add User</button>
-              </form>
-            </div>
-          )}
-        </Mutation>
+        <div className="mt-2 mb-4">
+          <form className="form-inline" onSubmit={(e) => this.addUser(e)}>
+            <input placeholder="Name" className="form-control" onChange={this.handleInputChange} value={this.state.name} name="name" />
+            <input placeholder="Email" className="form-control" onChange={this.handleInputChange} value={this.state.email} name="email" />
+            <button type="submit" className="btn btn-primary">Add User</button>
+          </form>
+        </div>
 
-        <Query query={GET_USERS}>
-          {({ loading, error, data }) => {
-            if (loading) return <p>Loading...</p>;
-            if (error) return <p>Error :(</p>;
-
-            return <ul className="list-group">
-              {data.users.map((user) => {
-                return <li key={user.id} className="list-group-item">
-                  {user.name} <User user={user} />
-                </li>
-              })}
-            </ul>
-          }}
-        </Query>
+        {this.state.users && <ul className="list-group">
+          {this.state.users.map((user) => {
+            return <li key={user.id} className="list-group-item">
+              {user.name} <User user={user} />
+            </li>
+          })}
+        </ul>}
       </React.Fragment>
     )
   }

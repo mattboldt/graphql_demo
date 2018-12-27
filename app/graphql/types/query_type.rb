@@ -4,7 +4,7 @@ module Types
     field :users, [Types::UserType], null: false
 
     def users
-      User.all
+      User.all.order(created_at: :desc)
     end
 
     field :user, Types::UserType, null: false do
